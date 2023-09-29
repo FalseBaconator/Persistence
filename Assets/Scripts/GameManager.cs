@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,17 +16,24 @@ public class GameManager : MonoBehaviour
 
     public float hp;
     public float maxHP;
+    public TextMeshProUGUI hpText;
     public float xp;
     public float toNextLevel;
+    public TextMeshProUGUI xpText;
     public float level;
+    public TextMeshProUGUI levelText;
     public float score;
+    public TextMeshProUGUI scoreText;
     public float coins;
+    public TextMeshProUGUI coinsText;
     public float specialCollects;
+    public TextMeshProUGUI collectsText;
 
     public static int gameManagerCount;
 
     public UIManager uiManager;
 
+    private int toAdd;
 
     public enum GameState { MainMenu, LevelSelect, GamePlay, Pause, Win, Lose }
 
@@ -37,64 +46,22 @@ public class GameManager : MonoBehaviour
             switch (value)
             {
                 case GameState.MainMenu:
-                    Time.timeScale = 1;
                     uiManager.OpenMainMenu();
-                    Cursor.visible = true;
-                    Cursor.lockState = CursorLockMode.None;
                     break;
                 case GameState.LevelSelect:
-                    Time.timeScale = 1;
                     uiManager.OpenLevelSelect();
-                    Cursor.visible = true;
-                    Cursor.lockState = CursorLockMode.None;
                     break;
                 case GameState.GamePlay:
-                    Time.timeScale = 1;
                     uiManager.OpenGameScreen();
-                    //player = FindFirstObjectByType<FirstPersonController_Sam>();
-                    try
-                    {
-                        //firstPersonSam.UnPause();
-                    }
-                    catch { }
-                    Cursor.visible = false;
-                    Cursor.lockState = CursorLockMode.Locked;
                     break;
                 case GameState.Pause:
-                    Time.timeScale = 0;
                     uiManager.OpenPauseScreen();
-                    //player = FindFirstObjectByType<FirstPersonController_Sam>();
-                    try
-                    {
-                        //firstPersonSam.Pause();
-                    }
-                    catch { }
-                    Cursor.visible = true;
-                    Cursor.lockState = CursorLockMode.None;
                     break;
                 case GameState.Win:
-                    Time.timeScale = 0;
                     uiManager.OpenWinScreen();
-                    //player = FindFirstObjectByType<FirstPersonController_Sam>();
-                    try
-                    {
-                        //firstPersonSam.Pause();
-                    }
-                    catch { }
-                    Cursor.visible = true;
-                    Cursor.lockState = CursorLockMode.None;
                     break;
                 case GameState.Lose:
-                    Time.timeScale = 0;
                     uiManager.OpenLoseScreen();
-                    //player = FindFirstObjectByType<FirstPersonController_Sam>();
-                    try
-                    {
-                        //firstPersonSam.Pause();
-                    }
-                    catch { }
-                    Cursor.visible = true;
-                    Cursor.lockState = CursorLockMode.None;
                     break;
             }
             _gameState = value;
@@ -116,6 +83,15 @@ public class GameManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+        switch (SceneManager.GetActiveScene().buildIndex)
+        {
+            case 0:
+                gameState = GameState.MainMenu;
+                break;
+            default:
+                gameState = GameState.GamePlay;
+                break;
         }
     }
 
@@ -179,6 +155,12 @@ public class GameManager : MonoBehaviour
                 {
                     gameState = GameState.Pause;
                 }
+                hpText.text = "HP: " + hp + "/" + maxHP;
+                xpText.text = "XP: " + xp + "/" + toNextLevel;
+                levelText.text = "LVL: " + level;
+                scoreText.text = "SCORE: " + score;
+                coinsText.text = "COINS: " + coins;
+                collectsText.text = "COLLECTIBLES: " + specialCollects;
                 break;
             case GameState.Pause:
                 if (Input.GetKeyDown(KeyCode.Escape))
@@ -192,6 +174,52 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+    }
+
+    public void SetAdd(int toSet)
+    {
+        toAdd = toSet;
+    }
+
+    public void ModifyXP(bool isUp)
+    {
+        if (isUp) xp += toAdd;
+        else xp -= toAdd;
+        while(xp >= toNextLevel)
+        {
+            level++;
+            xp -= toNextLevel;
+        }
+    }
+
+    public void ModifyHealth(bool isUp)
+    {
+        if (isUp) hp += toAdd;
+        else hp -= toAdd;
+        if (hp <= 0)
+        {
+            gameState = GameState.Lose;
+            hp = maxHP;
+        }
+        if(hp > maxHP) hp = maxHP;
+    }
+
+    public void ModifyScore(bool isUp)
+    {
+        if (isUp) score += toAdd;
+        else score -= toAdd;
+    }
+
+    public void ModifyCoins(bool isUp)
+    {
+        if (isUp) coins += toAdd;
+        else coins -= toAdd;
+    }
+
+    public void ModifyCollects(bool isUp)
+    {
+        if (isUp) specialCollects += toAdd;
+        else specialCollects -= toAdd;
     }
 
     public void GoToLevelSelect()
