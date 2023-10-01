@@ -99,7 +99,7 @@ public class GameManager : MonoBehaviour
     public void Save()
     {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Open(Application.persistentDataPath + "/SaveData.dat", FileMode.Open);
+        FileStream file = File.Create(Application.persistentDataPath + "/SaveData.dat");
 
         SaveData data = new SaveData();
         data.hp = hp;
