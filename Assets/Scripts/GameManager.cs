@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI collectsText;
 
     public static int gameManagerCount;
+    public TextMeshProUGUI managerCountText;
 
     public UIManager uiManager;
 
@@ -73,15 +74,16 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        gameManagerCount++;
         if(singleton == null)
         {
-            gameManagerCount++;
             DontDestroyOnLoad(gameObject);
             singleton = this;
             Load();
         }
         else
         {
+            gameManagerCount--;
             Destroy(gameObject);
         }
         switch (SceneManager.GetActiveScene().buildIndex)
@@ -139,6 +141,9 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        managerCountText.text = " GameManager Count: " + gameManagerCount;
+
         if (Input.GetKeyDown(KeyCode.Alpha1)) QuitToMenu(); // press 1
         if (Input.GetKeyDown(KeyCode.Alpha2)) LoadLevel(1); // press 2
         if (Input.GetKeyDown(KeyCode.Alpha3)) LoadLevel(2); // press 3
